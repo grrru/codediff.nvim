@@ -39,7 +39,7 @@ local function create_test_repo()
     "end",
   })
   run_git("add .")
-  run_git("commit -m 'initial commit'")
+  run_git('commit -m "initial commit"')
 
   -- Commit 2: change foo (lines 4-6)
   write_file("test.lua", {
@@ -54,7 +54,7 @@ local function create_test_repo()
     "end",
   })
   run_git("add .")
-  run_git("commit -m 'update foo'")
+  run_git('commit -m "update foo"')
 
   -- Commit 3: change bar (lines 7-9)
   write_file("test.lua", {
@@ -69,7 +69,7 @@ local function create_test_repo()
     "end",
   })
   run_git("add .")
-  run_git("commit -m 'update bar'")
+  run_git('commit -m "update bar"')
 
   -- Commit 4: change header (lines 1-3)
   write_file("test.lua", {
@@ -84,7 +84,7 @@ local function create_test_repo()
     "end",
   })
   run_git("add .")
-  run_git("commit -m 'update header'")
+  run_git('commit -m "update header"')
 
   return {
     dir = temp_dir,
