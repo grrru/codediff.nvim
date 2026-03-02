@@ -18,8 +18,10 @@ local diff_module = require("codediff.core.diff")
 --- @param orig_cursor table|nil: {line, col} to restore on original side
 --- @param mod_cursor table|nil: {line, col} to restore on modified side
 function M.establish_scrollbind(orig_win, mod_win, orig_buf, mod_buf, lines_diff, orig_cursor, mod_cursor)
-  -- Anchor at the first unchanged line when first change is at line 1 with
-  -- an empty range on one side — fillers above line 1 misalign syncbind.
+  -- When first change is a pure insertion/deletion at line 1, filler virt_lines
+  -- sit above line 1 on one side. Scrollbind at line 1 won't align because
+  -- one side has extra visual lines above. Fix: start scrollbind at the first
+  -- corresponding unchanged line after the initial change.
   if lines_diff and lines_diff.changes and #lines_diff.changes > 0 then
     local first = lines_diff.changes[1]
     local orig_empty = first.original.start_line >= first.original.end_line
@@ -31,13 +33,19 @@ function M.establish_scrollbind(orig_win, mod_win, orig_buf, mod_buf, lines_diff
       anchor_mod = math.min(anchor_mod, vim.api.nvim_buf_line_count(mod_buf))
       vim.api.nvim_win_set_cursor(orig_win, { anchor_orig, 0 })
       vim.api.nvim_win_set_cursor(mod_win, { anchor_mod, 0 })
+      vim.wo[orig_win].scrollbind = true
+      vim.wo[mod_win].scrollbind = true
+      vim.cmd("syncbind")
+      return
     end
   end
+
+  -- Normal path: both at line 1, enable scrollbind, move to target
+  vim.api.nvim_win_set_cursor(orig_win, { 1, 0 })
+  vim.api.nvim_win_set_cursor(mod_win, { 1, 0 })
   vim.wo[orig_win].scrollbind = true
   vim.wo[mod_win].scrollbind = true
-  vim.cmd("syncbind")
 
-  -- Scroll back to desired cursor positions
   if orig_cursor then
     pcall(vim.api.nvim_win_set_cursor, orig_win, orig_cursor)
   end
