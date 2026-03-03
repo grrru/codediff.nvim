@@ -149,9 +149,10 @@ function M.setup_fold_keymaps(opts)
   }
   local map_options = { noremap = true, silent = true, nowait = true }
   for _, binding in ipairs(fold_bindings) do
-    if keymaps[binding.key] then
-      vim.keymap.set("n", keymaps[binding.key], binding.fn, vim.tbl_extend("force", map_options, { buffer = bufnr, desc = binding.desc }))
-    else
+    local key = keymaps[binding.key]
+    if key then
+      vim.keymap.set("n", key, binding.fn, vim.tbl_extend("force", map_options, { buffer = bufnr, desc = binding.desc }))
+    elseif key == nil then
       local info = debug.getinfo(1, "Sl")
       local location = string.format("%s:%d", info.short_src, info.currentline)
       vim.notify(string.format("No keymap defined for %s, skipping fold keymap [%s]", binding.key, location), vim.log.levels.WARN)
