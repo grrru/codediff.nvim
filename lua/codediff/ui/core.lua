@@ -363,10 +363,14 @@ function M.render_diff(left_bufnr, right_bufnr, original_lines, modified_lines, 
     end
   end
 
-  -- Render moved code indicators (separate module, optional)
-  local ok, move = pcall(require, "codediff.ui.move")
-  if ok and move then
-    move.render_moves(left_bufnr, right_bufnr, lines_diff)
+  -- Render moved code indicators (separate module)
+  if lines_diff.moves and #lines_diff.moves > 0 then
+    local ok, move = pcall(require, "codediff.ui.move")
+    if ok and move then
+      move.render_moves(left_bufnr, right_bufnr, lines_diff)
+    else
+      vim.notify_once("[codediff] failed to load codediff.ui.move: " .. tostring(move), vim.log.levels.WARN)
+    end
   end
 
   return {

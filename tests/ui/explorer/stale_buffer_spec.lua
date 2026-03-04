@@ -153,16 +153,13 @@ describe("Stale Buffer After Git Operations", function()
     local lifecycle = require("codediff.ui.lifecycle")
 
     -- Precondition: file1.txt should be in unstaged with working-tree diff
-    assert.equals("unstaged", explorer.current_file_group,
-      "Initial file should be in unstaged group")
-    assert.equals("file1.txt", explorer.current_file_path,
-      "Initial file should be file1.txt")
+    assert.equals("unstaged", explorer.current_file_group, "Initial file should be in unstaged group")
+    assert.equals("file1.txt", explorer.current_file_path, "Initial file should be file1.txt")
 
     -- The modified side should show the working copy (modified_revision == nil or "WORKING")
     session = lifecycle.get_session(tabpage)
     local pre_mod_rev = session.modified_revision
-    assert.is_true(pre_mod_rev == nil or pre_mod_rev == "WORKING",
-      "Before staging: modified_revision should be nil/WORKING, got: " .. tostring(pre_mod_rev))
+    assert.is_true(pre_mod_rev == nil or pre_mod_rev == "WORKING", "Before staging: modified_revision should be nil/WORKING, got: " .. tostring(pre_mod_rev))
 
     -- Stage file1.txt
     vim.fn.system("git -C " .. vim.fn.shellescape(repo.dir) .. " add file1.txt")
@@ -173,10 +170,8 @@ describe("Stale Buffer After Git Operations", function()
     -- After staging, the file should have moved to the staged group
     -- and the diff panes should reflect the staged comparison (HEAD vs :0)
     session = lifecycle.get_session(tabpage)
-    assert.equals("staged", explorer.current_file_group,
-      "After staging: file should move to staged group")
-    assert.equals(":0", session.modified_revision,
-      "After staging: modified_revision should be :0 (staged index)")
+    assert.equals("staged", explorer.current_file_group, "After staging: file should move to staged group")
+    assert.equals(":0", session.modified_revision, "After staging: modified_revision should be :0 (staged index)")
   end)
 
   -- --------------------------------------------------------------------------
@@ -199,13 +194,13 @@ describe("Stale Buffer After Git Operations", function()
       group = "staged",
     })
     -- Give the async view.update chain time to settle
-    vim.wait(3000, function() return false end, 50)
+    vim.wait(3000, function()
+      return false
+    end, 50)
 
     -- Precondition: the synchronous tracker should reflect staged
-    assert.equals("staged", explorer.current_file_group,
-      "Precondition: should be viewing staged file1")
-    assert.equals("file1.txt", explorer.current_file_path,
-      "Precondition: should be viewing file1.txt")
+    assert.equals("staged", explorer.current_file_group, "Precondition: should be viewing staged file1")
+    assert.equals("file1.txt", explorer.current_file_path, "Precondition: should be viewing file1.txt")
 
     -- Unstage file1.txt
     vim.fn.system("git -C " .. vim.fn.shellescape(repo.dir) .. " reset HEAD file1.txt")
@@ -214,14 +209,12 @@ describe("Stale Buffer After Git Operations", function()
 
     -- After unstaging, the file should be back in the unstaged group
     -- and the diff panes should be re-selected with the new group.
-    assert.equals("unstaged", explorer.current_file_group,
-      "After unstaging: file should move to unstaged group")
+    assert.equals("unstaged", explorer.current_file_group, "After unstaging: file should move to unstaged group")
 
     -- Also check that the session revision was updated
     session = lifecycle.get_session(tabpage)
     local post_mod_rev = session.modified_revision
-    assert.is_true(post_mod_rev == nil or post_mod_rev == "WORKING",
-      "After unstaging: modified_revision should be nil/WORKING, got: " .. tostring(post_mod_rev))
+    assert.is_true(post_mod_rev == nil or post_mod_rev == "WORKING", "After unstaging: modified_revision should be nil/WORKING, got: " .. tostring(post_mod_rev))
   end)
 
   -- --------------------------------------------------------------------------
@@ -243,10 +236,11 @@ describe("Stale Buffer After Git Operations", function()
       git_root = repo.dir,
       group = "unstaged",
     })
-    vim.wait(3000, function() return false end, 50)
+    vim.wait(3000, function()
+      return false
+    end, 50)
 
-    assert.equals("unstaged", explorer.current_file_group,
-      "Precondition: should be viewing unstaged file1")
+    assert.equals("unstaged", explorer.current_file_group, "Precondition: should be viewing unstaged file1")
 
     -- Stage the new changes too (git add merges into staged)
     vim.fn.system("git -C " .. vim.fn.shellescape(repo.dir) .. " add file1.txt")
@@ -255,10 +249,8 @@ describe("Stale Buffer After Git Operations", function()
 
     -- File should now be in staged only, diff panes updated
     session = lifecycle.get_session(tabpage)
-    assert.equals("staged", explorer.current_file_group,
-      "After re-staging: file should move to staged group")
-    assert.equals(":0", session.modified_revision,
-      "After re-staging: modified_revision should be :0")
+    assert.equals("staged", explorer.current_file_group, "After re-staging: file should move to staged group")
+    assert.equals(":0", session.modified_revision, "After re-staging: modified_revision should be :0")
   end)
 
   -- --------------------------------------------------------------------------
@@ -269,8 +261,7 @@ describe("Stale Buffer After Git Operations", function()
     local lifecycle = require("codediff.ui.lifecycle")
 
     -- Precondition: viewing file1.txt in unstaged
-    assert.equals("unstaged", explorer.current_file_group,
-      "Precondition: file should be unstaged")
+    assert.equals("unstaged", explorer.current_file_group, "Precondition: file should be unstaged")
 
     -- Stage file1.txt
     vim.fn.system("git -C " .. vim.fn.shellescape(repo.dir) .. " add file1.txt")
@@ -278,10 +269,8 @@ describe("Stale Buffer After Git Operations", function()
     refresh_and_wait(explorer)
 
     session = lifecycle.get_session(tabpage)
-    assert.equals("staged", explorer.current_file_group,
-      "After staging: current_file_group should be staged")
-    assert.equals(":0", session.modified_revision,
-      "After staging: diff panes should show staged comparison (modified_revision = :0)")
+    assert.equals("staged", explorer.current_file_group, "After staging: current_file_group should be staged")
+    assert.equals(":0", session.modified_revision, "After staging: diff panes should show staged comparison (modified_revision = :0)")
   end)
 
   -- --------------------------------------------------------------------------
@@ -293,8 +282,7 @@ describe("Stale Buffer After Git Operations", function()
     local welcome = require("codediff.ui.welcome")
 
     -- Precondition: file1.txt selected in unstaged
-    assert.equals("file1.txt", explorer.current_file_path,
-      "Precondition: should be viewing file1.txt")
+    assert.equals("file1.txt", explorer.current_file_path, "Precondition: should be viewing file1.txt")
 
     -- Commit only file1.txt
     vim.fn.system("git -C " .. vim.fn.shellescape(repo.dir) .. " add file1.txt")
@@ -303,12 +291,10 @@ describe("Stale Buffer After Git Operations", function()
     refresh_and_wait(explorer)
 
     -- file1.txt should be gone from the tree
-    assert.is_false(file_exists_in_tree(explorer, "file1.txt"),
-      "file1.txt should be removed from explorer after commit")
+    assert.is_false(file_exists_in_tree(explorer, "file1.txt"), "file1.txt should be removed from explorer after commit")
 
     -- file2.txt should still be present
-    assert.is_true(file_exists_in_tree(explorer, "file2.txt"),
-      "file2.txt should still be in explorer tree")
+    assert.is_true(file_exists_in_tree(explorer, "file2.txt"), "file2.txt should still be in explorer tree")
 
     -- The diff panes should NOT show stale file1.txt content.
     -- They should either show welcome (if nothing auto-selected)
@@ -316,8 +302,7 @@ describe("Stale Buffer After Git Operations", function()
     session = lifecycle.get_session(tabpage)
     local shows_welcome = welcome.is_welcome_buffer(session.modified_bufnr)
     local shows_different_file = explorer.current_file_path ~= "file1.txt"
-    assert.is_true(shows_welcome or shows_different_file,
-      "After committing file1: should show welcome or a different file, not stale file1 content")
+    assert.is_true(shows_welcome or shows_different_file, "After committing file1: should show welcome or a different file, not stale file1 content")
   end)
 
   -- --------------------------------------------------------------------------
@@ -335,13 +320,13 @@ describe("Stale Buffer After Git Operations", function()
     refresh_and_wait(explorer)
 
     -- Explorer tree should have zero files
-    assert.equals(0, count_tree_files(explorer),
-      "Explorer tree should have 0 files after committing everything")
+    assert.equals(0, count_tree_files(explorer), "Explorer tree should have 0 files after committing everything")
 
     -- Diff panes should show the welcome page
     session = lifecycle.get_session(tabpage)
-    assert.is_true(welcome.is_welcome_buffer(session.modified_bufnr),
-      "Welcome buffer should be shown after committing all files")
+    assert.is_true(welcome.is_welcome_buffer(session.modified_bufnr), "Welcome buffer should be shown after committing all files")
+    assert.is_nil(explorer.current_file_path, "Current file path should be cleared when the tree becomes empty")
+    assert.is_nil(explorer.current_file_group, "Current file group should be cleared when the tree becomes empty")
   end)
 
   -- --------------------------------------------------------------------------
@@ -358,12 +343,12 @@ describe("Stale Buffer After Git Operations", function()
     refresh_and_wait(explorer)
 
     -- Explorer tree should have zero files
-    assert.equals(0, count_tree_files(explorer),
-      "Explorer tree should have 0 files after stashing all changes")
+    assert.equals(0, count_tree_files(explorer), "Explorer tree should have 0 files after stashing all changes")
 
     -- Diff panes should show the welcome page
     session = lifecycle.get_session(tabpage)
-    assert.is_true(welcome.is_welcome_buffer(session.modified_bufnr),
-      "Welcome buffer should be shown after stashing all changes")
+    assert.is_true(welcome.is_welcome_buffer(session.modified_bufnr), "Welcome buffer should be shown after stashing all changes")
+    assert.is_nil(explorer.current_file_path, "Current file path should be cleared when the tree becomes empty")
+    assert.is_nil(explorer.current_file_group, "Current file group should be cleared when the tree becomes empty")
   end)
 end)

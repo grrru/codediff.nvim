@@ -253,6 +253,11 @@ function M.refresh(explorer)
       -- Update status result for file selection logic
       explorer.status_result = status_result
 
+      local function clear_current_file()
+        explorer.current_file_path = nil
+        explorer.current_file_group = nil
+      end
+
       -- Helper: show the welcome page in the diff panes
       local function show_welcome_page()
         local lifecycle = require("codediff.ui.lifecycle")
@@ -281,6 +286,7 @@ function M.refresh(explorer)
       -- Show welcome page when all files are clean
       local total_files = #(status_result.unstaged or {}) + #(status_result.staged or {}) + #(status_result.conflicts or {})
       if total_files == 0 then
+        clear_current_file()
         show_welcome_page()
       end
 
@@ -332,8 +338,7 @@ function M.refresh(explorer)
           })
         else
           -- File was committed/removed — show welcome
-          explorer.current_file_path = nil
-          explorer.current_file_group = nil
+          clear_current_file()
           show_welcome_page()
         end
       end
