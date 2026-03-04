@@ -4,7 +4,6 @@ local M = {}
 local config = require("codediff.config")
 local tree_module = require("codediff.ui.explorer.tree")
 local welcome = require("codediff.ui.welcome")
-
 -- Setup auto-refresh triggers for explorer
 -- Returns a cleanup function that should be called when the explorer is destroyed
 function M.setup_auto_refresh(explorer, tabpage)
@@ -256,38 +255,24 @@ function M.refresh(explorer)
       local function clear_current_file()
         explorer.current_file_path = nil
         explorer.current_file_group = nil
-      end
-
-      -- Helper: show the welcome page in the diff panes
-      local function show_welcome_page()
-        local lifecycle = require("codediff.ui.lifecycle")
-        local session = lifecycle.get_session(explorer.tabpage)
-        if session and not welcome.is_welcome_buffer(session.modified_bufnr) then
-          local mod_win = session.modified_win
-          if mod_win and vim.api.nvim_win_is_valid(mod_win) then
-            if session.layout == "inline" then
-              local w = vim.api.nvim_win_get_width(mod_win)
-              local h = vim.api.nvim_win_get_height(mod_win)
-              local welcome_buf = welcome.create_buffer(w, h)
-              require("codediff.ui.view.inline_view").show_welcome(explorer.tabpage, welcome_buf)
-            else
-              local orig_win = session.original_win
-              if orig_win and vim.api.nvim_win_is_valid(orig_win) then
-                local w = vim.api.nvim_win_get_width(orig_win) + vim.api.nvim_win_get_width(mod_win) + 1
-                local h = vim.api.nvim_win_get_height(orig_win)
-                local welcome_buf = welcome.create_buffer(w, h)
-                require("codediff.ui.view.side_by_side").show_welcome(explorer.tabpage, welcome_buf)
-              end
-            end
-          end
+        explorer.current_selection = nil
+        if explorer.clear_selection then
+          explorer.clear_selection()
         end
       end
 
-      -- Show welcome page when all files are clean
+      local show_welcome_page = require("codediff.ui.explorer.render").show_welcome_page
+
+      -- Show welcome page when all files are clean (skip if already showing)
       local total_files = #(status_result.unstaged or {}) + #(status_result.staged or {}) + #(status_result.conflicts or {})
       if total_files == 0 then
+        local lifecycle = require("codediff.ui.lifecycle")
+        local session = lifecycle.get_session(explorer.tabpage)
+        local already_welcome = session and welcome.is_welcome_buffer(session.modified_bufnr)
         clear_current_file()
-        show_welcome_page()
+        if not already_welcome then
+          show_welcome_page(explorer)
+        end
       end
 
       -- Re-select the currently viewed file after refresh.
@@ -339,7 +324,7 @@ function M.refresh(explorer)
         else
           -- File was committed/removed — show welcome
           clear_current_file()
-          show_welcome_page()
+          show_welcome_page(explorer)
         end
       end
     end)
