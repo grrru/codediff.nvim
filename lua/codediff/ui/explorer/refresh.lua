@@ -331,13 +331,14 @@ function M.refresh(explorer)
 
         if found_file then
           -- Re-select current file — on_file_select guard handles deduplication
+          -- Pass no_jump to preserve cursor position (this is a refresh, not user click)
           explorer.on_file_select({
             path = found_file.path,
             old_path = found_file.old_path,
             status = found_file.status,
             git_root = explorer.git_root,
             group = found_group,
-          })
+          }, { no_jump = true })
         else
           -- File was committed/removed — show welcome
           clear_current_file()

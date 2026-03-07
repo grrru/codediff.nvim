@@ -189,6 +189,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
     local file_path = file_data.path
     local old_path = file_data.old_path -- For renames: path in original revision
     local group = file_data.group or "unstaged"
+    local jump = not opts.no_jump and config.options.diff.jump_to_first_change
 
     -- Emit CodeDiffFileSelect User autocmd
     vim.api.nvim_exec_autocmds("User", {
@@ -222,7 +223,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
           original_revision = nil,
           modified_revision = nil,
         }
-        view.update(tabpage, session_config, config.options.diff.jump_to_first_change)
+        view.update(tabpage, session_config, jump)
       end)
       return
     end
@@ -368,7 +369,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
           original_revision = base_revision,
           modified_revision = target_revision,
         }
-        view.update(tabpage, session_config, config.options.diff.jump_to_first_change)
+        view.update(tabpage, session_config, jump)
       end)
       return
     end
@@ -395,7 +396,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
             original_revision = commit_hash,
             modified_revision = nil,
           }
-          view.update(tabpage, session_config, config.options.diff.jump_to_first_change)
+          view.update(tabpage, session_config, jump)
         end)
       elseif group == "conflicts" then
         -- Merge conflict: Show incoming (:3) vs current (:2), both diffed against base (:1)
@@ -427,7 +428,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
             modified_revision = modified_rev,
             conflict = true,
           }
-          view.update(tabpage, session_config, config.options.diff.jump_to_first_change)
+          view.update(tabpage, session_config, jump)
         end)
       elseif group == "staged" then
         -- Staged changes: Compare staged (:0) vs HEAD (both virtual)
@@ -443,7 +444,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
             original_revision = commit_hash,
             modified_revision = ":0",
           }
-          view.update(tabpage, session_config, config.options.diff.jump_to_first_change)
+          view.update(tabpage, session_config, jump)
         end)
       else
         -- Unstaged changes: Compare working tree vs staged (if exists) or HEAD
@@ -471,7 +472,7 @@ function M.create(status_result, git_root, tabpage, width, base_revision, target
             original_revision = original_revision,
             modified_revision = nil,
           }
-          view.update(tabpage, session_config, config.options.diff.jump_to_first_change)
+          view.update(tabpage, session_config, jump)
         end)
       end
     end)

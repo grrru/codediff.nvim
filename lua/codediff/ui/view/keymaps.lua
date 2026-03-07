@@ -404,6 +404,12 @@ function M.setup_all_keymaps(tabpage, original_bufnr, modified_bufnr, is_explore
       return
     end
 
+    -- Only allow staging from unstaged views (working tree changes)
+    if session.modified_revision ~= nil then
+      vim.notify("Stage only works on unstaged changes", vim.log.levels.WARN)
+      return
+    end
+
     local hunk, hunk_idx = find_hunk_at_cursor()
     if not hunk then
       vim.notify("No hunk at cursor position", vim.log.levels.WARN)
@@ -444,6 +450,12 @@ function M.setup_all_keymaps(tabpage, original_bufnr, modified_bufnr, is_explore
     local session = lifecycle.get_session(tabpage)
     if not session or not session.git_root then
       vim.notify("Not in a git repository", vim.log.levels.WARN)
+      return
+    end
+
+    -- Only allow unstaging from staged views
+    if session.modified_revision ~= ":0" then
+      vim.notify("Unstage only works on staged changes", vim.log.levels.WARN)
       return
     end
 
