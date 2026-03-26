@@ -32,13 +32,30 @@ function M.arrange(tabpage)
     panel_config = config.options.explorer or {}
   end
   local panel_position = panel_config.position or "left"
+  local panel_size = nil
+
+  if panel_visible then
+    if panel_position == "left" then
+      panel_size = vim.api.nvim_win_get_width(panel_win)
+    else
+      panel_size = vim.api.nvim_win_get_height(panel_win)
+    end
+
+    if panel.split then
+      panel.split._size = panel_size
+    end
+  elseif panel_position == "left" then
+    panel_size = panel_config.width
+  else
+    panel_size = panel_config.height
+  end
 
   -- Step 1: Pin panel size (fixed element)
   if panel_visible then
     if panel_position == "left" then
-      vim.api.nvim_win_set_width(panel_win, panel_config.width)
+      vim.api.nvim_win_set_width(panel_win, panel_size)
     else
-      vim.api.nvim_win_set_height(panel_win, panel_config.height)
+      vim.api.nvim_win_set_height(panel_win, panel_size)
     end
   end
 
@@ -52,12 +69,12 @@ function M.arrange(tabpage)
     if sole_win then
       if panel_visible then
         if panel_position == "left" then
-          vim.api.nvim_win_set_width(panel_win, panel_config.width)
+          vim.api.nvim_win_set_width(panel_win, panel_size)
           -- Explicitly set diff window to fill remainder
-          local remainder = vim.o.columns - panel_config.width - 1
+          local remainder = vim.o.columns - panel_size - 1
           vim.api.nvim_win_set_width(sole_win, remainder)
         else
-          vim.api.nvim_win_set_height(panel_win, panel_config.height)
+          vim.api.nvim_win_set_height(panel_win, panel_size)
           -- Diff window takes full width
           vim.api.nvim_win_set_width(sole_win, vim.o.columns)
         end
@@ -118,9 +135,9 @@ function M.arrange(tabpage)
   -- Step 5: Re-pin panel size (undo disturbance from step 4)
   if panel_visible then
     if panel_position == "left" then
-      vim.api.nvim_win_set_width(panel_win, panel_config.width)
+      vim.api.nvim_win_set_width(panel_win, panel_size)
     else
-      vim.api.nvim_win_set_height(panel_win, panel_config.height)
+      vim.api.nvim_win_set_height(panel_win, panel_size)
     end
   end
 end
