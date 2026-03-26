@@ -202,6 +202,39 @@ function M.create_session(
       end)
     end,
   })
+
+  vim.api.nvim_create_autocmd({ "VimResized" }, {
+    group = tab_augroup,
+    callback = function()
+      local sess = active_diffs[tabpage]
+      if not sess then
+        return
+      end
+
+      if vim.api.nvim_get_current_tabpage() ~= tabpage then
+        return
+      end
+
+      if vim.v.event and vim.v.event.windows then
+        local resized = {}
+        for _, win in ipairs(vim.v.event.windows) do
+          resized[win] = true
+        end
+
+        local panel_win = sess.explorer and sess.explorer.winid or nil
+        if not resized[sess.original_win] and not resized[sess.modified_win] and not resized[sess.result_win] and not resized[panel_win] then
+          return
+        end
+      end
+
+      vim.schedule(function()
+        local layout = require("codediff.ui.layout")
+        if active_diffs[tabpage] and vim.api.nvim_get_current_tabpage() == tabpage then
+          layout.arrange(tabpage)
+        end
+      end)
+    end,
+  })
 end
 
 return M
