@@ -184,35 +184,52 @@ function M.apply_semantic_tokens(left_buf, right_buf)
     return false
   end
 
-  -- Get URI and content from left buffer
-  local left_uri = vim.uri_from_bufnr(left_buf)
+  -- Get content from left buffer
   local left_lines = api.nvim_buf_get_lines(left_buf, 0, -1, false)
   local left_text = table.concat(left_lines, "\n")
 
   -- Get language ID from right buffer's filetype
   local language_id = vim.bo[right_buf].filetype or "text"
 
+  -- Build a virtual file:// URI based on the real file's path.
+  -- File-based LSP servers (gopls, etc.) only handle file:// URIs and will
+  -- disconnect on unknown schemes like codediff://. By using a hidden filename
+  -- in the same directory, the server recognises it as part of the same
+  -- module/workspace and analyses the content we supply via didOpen.
+  local right_fname = api.nvim_buf_get_name(right_buf)
+  local right_dir = vim.fn.fnamemodify(right_fname, ":h")
+  local right_tail = vim.fn.fnamemodify(right_fname, ":t")
+  local virtual_fname = right_dir .. "/." .. right_tail .. ".codediff"
+  local virtual_uri = vim.uri_from_fname(virtual_fname)
+
   -- First, notify LSP about this virtual file via textDocument/didOpen
   local didopen_params = {
     textDocument = {
-      uri = left_uri,
+      uri = virtual_uri,
       languageId = language_id,
       version = 1,
       text = left_text,
     },
   }
 
-  client.notify("textDocument/didOpen", didopen_params)
+  client.rpc.notify("textDocument/didOpen", didopen_params)
 
   -- Now request semantic tokens for this file
   local params = {
     textDocument = {
-      uri = left_uri,
+      uri = virtual_uri,
     },
   }
 
   -- Make async request for semantic tokens
   client.request("textDocument/semanticTokens/full", params, function(err, result)
+    -- Always send didClose to clean up the virtual document from LSP
+    pcall(function()
+      client.rpc.notify("textDocument/didClose", {
+        textDocument = { uri = virtual_uri },
+      })
+    end)
+
     if err then
       return
     end
