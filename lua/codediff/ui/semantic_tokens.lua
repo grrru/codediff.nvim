@@ -222,7 +222,7 @@ function M.apply_semantic_tokens(left_buf, right_buf)
   }
 
   -- Make async request for semantic tokens
-  client.request("textDocument/semanticTokens/full", params, function(err, result)
+  client:request("textDocument/semanticTokens/full", params, function(err, result)
     -- Always send didClose to clean up the virtual document from LSP
     pcall(function()
       client.rpc.notify("textDocument/didClose", {
