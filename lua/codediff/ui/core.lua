@@ -96,7 +96,7 @@ local function utf16_col_to_byte_col(line, utf16_col)
     return utf16_col
   end
   -- vim.str_byteindex uses 0-based indexing, our columns are 1-based
-  local ok, byte_idx = pcall(vim.str_byteindex, line, utf16_col - 1, true)
+  local ok, byte_idx = pcall(vim.str_byteindex, line, "utf-16", utf16_col - 1, true)
   if ok then
     return byte_idx + 1
   end

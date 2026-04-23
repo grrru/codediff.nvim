@@ -202,7 +202,7 @@ function M.apply_semantic_tokens(left_buf, right_buf)
     },
   }
 
-  client.notify("textDocument/didOpen", didopen_params)
+  client:notify("textDocument/didOpen", didopen_params)
 
   -- Now request semantic tokens for this file
   local params = {
@@ -212,7 +212,7 @@ function M.apply_semantic_tokens(left_buf, right_buf)
   }
 
   -- Make async request for semantic tokens
-  client.request("textDocument/semanticTokens/full", params, function(err, result)
+  client:request("textDocument/semanticTokens/full", params, function(err, result)
     if err then
       return
     end

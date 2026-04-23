@@ -66,14 +66,18 @@ local function cleanup_diff(tabpage)
   for _, client in ipairs(clients) do
     if client.server_capabilities.semanticTokensProvider then
       if original_virtual_uri then
-        pcall(client.notify, "textDocument/didClose", {
-          textDocument = { uri = original_virtual_uri },
-        })
+        pcall(function()
+          client:notify("textDocument/didClose", {
+            textDocument = { uri = original_virtual_uri },
+          })
+        end)
       end
       if modified_virtual_uri then
-        pcall(client.notify, "textDocument/didClose", {
-          textDocument = { uri = modified_virtual_uri },
-        })
+        pcall(function()
+          client:notify("textDocument/didClose", {
+            textDocument = { uri = modified_virtual_uri },
+          })
+        end)
       end
     end
   end

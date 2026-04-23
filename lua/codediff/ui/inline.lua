@@ -126,7 +126,7 @@ local function utf16_col_to_byte_col(line, utf16_col)
   if not line or utf16_col <= 1 then
     return utf16_col
   end
-  local ok, byte_idx = pcall(vim.str_byteindex, line, utf16_col - 1, true)
+  local ok, byte_idx = pcall(vim.str_byteindex, line, "utf-16", utf16_col - 1, true)
   if ok then
     return byte_idx + 1
   end
