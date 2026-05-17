@@ -49,6 +49,7 @@ M.defaults = {
   -- Explorer panel configuration
   explorer = {
     position = "left", -- "left" or "bottom"
+    hidden = false, -- Initial visibility state
     width = 40, -- Width when position is "left" (columns)
     height = 15, -- Height when position is "bottom" (lines)
     auto_refresh = true, -- Enable automatic explorer refresh (BufEnter + git watcher)
@@ -64,6 +65,7 @@ M.defaults = {
     },
     focus_on_select = false, -- Jump to modified pane after selecting a file (default: stay in explorer)
     flatten_dirs = true, -- Flatten single-child directory chains in tree view (e.g., src/components/ui/)
+    status_right_margin = 1, -- Trailing cells between the status symbol (M/A/D) and the right edge; increase if Nerd Font icons clip it
     visible_groups = { -- Which groups to show in explorer (can be toggled at runtime)
       staged = true,
       unstaged = true,
